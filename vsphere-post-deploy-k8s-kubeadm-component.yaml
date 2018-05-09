@@ -1,7 +1,7 @@
 ---
-id: 13
+id: 30102
 guid: "6994a3a1-e5bd-43a9-bbe1-a9097f8c8c6a"
-name: "post-deploy-k8s-kubeadm-component"
+name: "vsphere-post-deploy-k8s-kubeadm-component"
 type: "COMPONENT_COMPLETION"
 fulfillment_rule: "NONE"
 add_owner_as_admin: false
@@ -23,7 +23,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -33,7 +33,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -43,7 +43,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -54,7 +54,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -67,7 +67,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -80,17 +80,27 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
     command_line: "yum -y update"
     capture_output: true
+- name: "Remove swap from fstab"
+  type: "SSH"
+  condition: null
+  data:
+    hostname: "#{target.ipv4Addresses}"
+    credentials: "kubeadm-template"
+    failure_action: "FAIL_STEP"
+    timeout: 300
+    command_line: "sed -i '/swap/d' /etc/fstab"
+    capture_output: true
 - name: "Install Docker"
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -101,38 +111,38 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
-    command_line: "yum install -y kubelet-#{request.service.components['kubeadm_version'].settings.customAttribute['k8s-version']};\
+    command_line: "yum install -y kubelet-#{request.service.components['kubernetes_version'].settings.customAttribute['kubernetes_version']};\
       \ systemctl enable kubelet; systemctl start kubelet"
     capture_output: true
 - name: "Install kubectl"
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
-    command_line: "yum install -y kubectl-#{request.service.components['kubeadm_version'].settings.customAttribute['k8s-version']}"
+    command_line: "yum install -y kubectl-#{request.service.components['kubernetes_version'].settings.customAttribute['kubernetes_version']}"
     capture_output: true
 - name: "Install kubeadm"
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
-    command_line: "yum install -y kubeadm-#{request.service.components['kubeadm_version'].settings.customAttribute['k8s-version']}"
+    command_line: "yum install -y kubeadm-#{request.service.components['kubernetes_version'].settings.customAttribute['kubernetes_version']}"
     capture_output: true
 - name: "Disable firewalld"
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -142,7 +152,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
@@ -153,7 +163,7 @@ steps:
   type: "SSH"
   condition: null
   data:
-    hostname: "#{target.ipAddress}"
+    hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
     timeout: 300
