@@ -1,8 +1,9 @@
 ---
-id: 30102
+id: 62
 guid: "6994a3a1-e5bd-43a9-bbe1-a9097f8c8c6a"
 name: "vsphere-post-deploy-k8s-kubeadm-component"
 type: "COMPONENT_COMPLETION"
+change_description: null
 fulfillment_rule: "NONE"
 add_owner_as_admin: false
 auto_deploy: false
@@ -83,7 +84,7 @@ steps:
     hostname: "#{target.ipv4Addresses}"
     credentials: "kubeadm-template"
     failure_action: "FAIL_STEP"
-    timeout: 300
+    timeout: 600
     command_line: "yum -y update"
     capture_output: true
 - name: "Remove swap from fstab"
