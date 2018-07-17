@@ -122,8 +122,8 @@ steps:
   type: "K8S_ADD_TO_INV"
   condition: null
   data:
-    Server: "#{request.service.components['kubernetes_name'].settings.customAttribute['kubernetes_name']}"
-    Configuration: "#{steps[10].output}"
+    server: "#{request.service.components['kubernetes_name'].settings.customAttribute['kubernetes_name']}"
+    configuration: "#{steps[10].output}"
 - name: "Send Email"
   type: "EMAIL"
   condition: null
