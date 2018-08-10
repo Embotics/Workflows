@@ -1,0 +1,89 @@
+{
+  "id" : 7,
+  "guid" : "5a9d0a9b-8b5a-4698-8cf8-ea2986bccf33",
+  "Name" : "Decomission VM",
+  "type" : "COMMAND",
+  "fulfillment_rule" : null,
+  "add_owner_as_admin" : false,
+  "auto_deploy" : false,
+  "users" : [ ],
+  "organizations" : [ ],
+  "target_type" : "ALL",
+  "info_messages" : [ ],
+  "prompt_message" : "Warning: Running this workflow will destroy it's target and is irreversible. ",
+  "steps" : [ {
+    "name" : "Unprotect VM - Zerto",
+    "type" : "SCRIPT",
+    "condition" : "#{target.customAttribute['Protect VM']} -eq \"Yes\"",
+    "data" : {
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "powershell.exe  -ExecutionPolicy Bypass -command \"&{C:\\Scripts\\Zerto\\Production\\ZertovCommanderOrg_Remove.ps1 \"#{target.organization.name}\"  \"#{target.deployedName}\" }\"",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Remove Chef Node",
+    "type" : "CHEF",
+    "condition" : "#{target.chefNode} -eq true",
+    "data" : {
+      "node" : "#{target.chefNodeName}",
+      "organization" : "Automatic",
+      "action" : "DELETE"
+    }
+  }, {
+    "name" : "Remove IAM for Stack if Set",
+    "type" : "SCRIPT",
+    "condition" : "\"#{target.customAttribute['S3 Bucket Name']}\" -ne ''",
+    "data" : {
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "PowerShell.exe C:\\Scripts\\Informatica\\CloudFormationTemplates\\Informatica_S3\\RemoveIAM_Assignment.ps1  '#{target.deployedName}'  '#{target.region.name}'",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Remove Pem for Stack",
+    "type" : "SCRIPT",
+    "condition" : "\"#{target.customAttribute['EMR - Cluster Name']}\" -ne \"\"",
+    "data" : {
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "PowerShell.exe C:\\Scripts\\RemoveEMR_pem.ps1 '#{target.customAttribute['EMR - Cluster Name']}'",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Remove from AD and DNS",
+    "type" : "SCRIPT",
+    "condition" : "\"#{target.dnsName}\" -contains \".com\"",
+    "data" : {
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "powershell.exe c:\\scripts\\Remove_ComputerAD_DNS.ps1 #{target.id}",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Perform Power Action",
+    "type" : "POWER",
+    "condition" : "(#{target.type} -eq \"Virtual Machine\" ) -or (#{target.type} -eq \"Virtual Service\") -and (#{target.state} -ne \"Not Running\" )",
+    "data" : {
+      "power_action" : "START_VM"
+    }
+  }, {
+    "name" : "Notify Teams",
+    "type" : "EMAIL",
+    "condition" : null,
+    "data" : {
+      "address_list" : "#{target.allOwners.email}",
+      "email_body" : "This is a courtesy notification that service #{target.deployedName} with DNS name #{target.dnsName} has been decommissioned. ",
+      "email_subject" : "Command workflow notification",
+      "include_details" : true
+    }
+  }, {
+    "name" : "Perform Remove Action",
+    "type" : "REMOVE",
+    "condition" : null,
+    "data" : {
+      "remove_type" : "DELETE_FROM_DISK",
+      "failure_action" : "FAIL_STEP"
+    }
+  } ]
+}
