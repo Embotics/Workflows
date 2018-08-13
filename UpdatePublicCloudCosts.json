@@ -1,7 +1,7 @@
 {
   "id" : 7,
   "guid" : "5a9d0a9b-8b5a-4698-8cf8-ea2986bccf33",
-  "Name" : "Decomission VM",
+  "name" : "Decomission VM",
   "type" : "COMMAND",
   "fulfillment_rule" : null,
   "add_owner_as_admin" : false,
