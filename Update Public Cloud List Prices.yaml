@@ -1,0 +1,99 @@
+############################################################################
+#
+#	Copyright (c) 2018 Embotics Corporation. All Rights Reserved.
+#
+#	This work is licensed under the terms of the Apache 2.0 license.  
+#	For a copy, see <https://opensource.org/licenses/Apache-2.0>.
+#
+############################################################################
+
+# This workflow will download the latest AWS and Azure price lists from the web and reload them into vCommander.
+
+---
+id: 1562
+name: "Update Public Cloud List Prices"
+type: "COMMAND"
+change_description: null
+fulfillment_rule: null
+add_owner_as_admin: false
+auto_deploy: false
+users: []
+organizations: []
+target_type: "NO_INVENTORY_TARGET"
+info_messages: []
+prompt_message: null
+system_version: "7.0.2 (1007020052)"
+steps:
+
+# Download and overwrite the AWS list price
+- name: "Update AWS List Price"
+  type: "EMBEDDED_SCRIPT"
+  condition: null
+  data:
+    credentials: null
+    failure_action: "FAIL_STEP"
+    script_contents: "# the AWS list price end point\r\n$endpoint = \"http://emboticss3.s3.amazonaws.com/Costs/costs-aws.xml\"\
+      \r\n   \r\n# get the AWS list price\r\n$priceList = Invoke-WebRequest $endpoint\
+      \ -Method Get -TimeoutSec 120 -UseBasicParsing\r\n\r\n#Write it\r\nOut-File\
+      \ -Encoding \"UTF8\" -FilePath \"../common/classes/costs-aws.xml\" -InputObject\
+      \ $priceList.Content"
+    script_arguments: ""
+    timeout: 130
+    executable: "powershell.exe -ExecutionPolicy Bypass"
+    capture_output: true
+
+# Retry downloading and overwriting the AWS list price if it failed
+- name: "Retry Updating AWS List Price"
+  type: "RETRY"
+  condition: null
+  data:
+    retries: "3"
+    wait: "5"
+    wait_units: "SECONDS"
+
+# Download and overwrite the Azure list price
+- name: "Update Azure List Price"
+  type: "EMBEDDED_SCRIPT"
+  condition: null
+  data:
+    credentials: null
+    failure_action: "FAIL_STEP"
+    script_contents: "# the Azure list price end point\r\n$endpoint = \"http://emboticss3.s3.amazonaws.com/Costs/costs-arm.xml\"\
+      \r\n   \r\n# get the Azure list price\r\n$priceList = Invoke-WebRequest $endpoint\
+      \ -Method Get -TimeoutSec 120 -UseBasicParsing\r\n\r\n#Write it\r\nOut-File\
+      \ -Encoding \"UTF8\" -FilePath \"../common/classes/costs-arm.xml\" -InputObject\
+      \ $priceList.Content"
+    script_arguments: ""
+    timeout: 130
+    executable: "powershell.exe -ExecutionPolicy Bypass"
+    capture_output: true
+
+# Retry downloading and overwriting the Azure list price if it failed
+- name: "Retry Updating arm List Price"
+  type: "RETRY"
+  condition: null
+  data:
+    retries: "3"
+    wait: "5"
+    wait_units: "SECONDS"
+
+# Reload the list pricesinto vCommander
+- name: "Reload Cloud List Prices"
+  type: "REST"
+  condition: null
+  data:
+    success_codes: "200"
+
+    ##########################################################################################
+    # This credential needs to be added to the workflow and be a valid vCommander credential #
+    credentials: null
+    ##########################################################################################
+
+    result_filter: ""
+    failure_action: "FAIL_STEP"
+    rest_action: "POST"
+    format: "XML"
+    header: ""
+    body: ""
+    url: "https://#{system.address}:#{system.port}/webservices/services/rest/v2/configurations/costmodels/action/reload"
+    capture_output: true
