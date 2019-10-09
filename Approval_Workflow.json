@@ -1,0 +1,26 @@
+{
+  "id" : 124,
+  "guid" : "2dec9294-9878-4b70-ae28-fa9668c65d4c",
+  "name" : "Approval Workflow",
+  "type" : "APPROVAL",
+  "change_description" : null,
+  "fulfillment_rule" : "NONE",
+  "add_owner_as_admin" : false,
+  "auto_deploy" : true,
+  "users" : [ ],
+  "organizations" : [ "Default Organization" ],
+  "target_type" : null,
+  "info_messages" : [ ],
+  "prompt_message" : null,
+  "system_version" : "8.0.0 (1007050053)",
+  "steps" : [ {
+    "name" : "Send Quota Approval Email",
+    "type" : "QUOTA_APPROVAL",
+    "condition" : "APPR_EMAIL_ANY_QUOTA_EXCEEDED",
+    "data" : {
+      "address_list" : "manager@organization.com",
+      "email_body" : "Please review the following request details.",
+      "email_subject" : "Service request #{request.id}: Approval needed."
+    }
+  } ]
+}
