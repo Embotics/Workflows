@@ -1,0 +1,34 @@
+{
+  "id" : 127,
+  "guid" : "91ac4ee2-923a-4d2c-aca3-a7a1833b2bce",
+  "name" : "Decommission Stack",
+  "type" : "COMMAND",
+  "change_description" : null,
+  "fulfillment_rule" : null,
+  "add_owner_as_admin" : false,
+  "auto_deploy" : false,
+  "users" : [ ],
+  "organizations" : [ ],
+  "target_type" : "STACK",
+  "info_messages" : [ ],
+  "prompt_message" : null,
+  "system_version" : "8.0.0 (1007050053)",
+  "steps" : [ {
+    "name" : "Send Approval Email",
+    "type" : "APPROVER",
+    "condition" : null,
+    "data" : {
+      "address_list" : "manager@organization.com",
+      "email_body" : "Please review the following details.",
+      "email_subject" : "Decommission Stack approval needed"
+    }
+  }, {
+    "name" : "Perform Remove Action",
+    "type" : "REMOVE",
+    "condition" : null,
+    "data" : {
+      "remove_type" : "DELETE_FROM_DISK",
+      "failure_action" : "FAIL_STEP"
+    }
+  } ]
+}
