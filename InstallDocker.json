@@ -1,0 +1,108 @@
+{
+  "id" : 8,
+  "guid" : "41157b4a-3f3a-4c08-ba47-c5001285a39f",
+  "name" : "Docker Install",
+  "type" : "COMPONENT_COMPLETION",
+  "change_description" : null,
+  "fulfillment_rule" : null,
+  "add_owner_as_admin" : false,
+  "auto_deploy" : false,
+  "users" : [ ],
+  "organizations" : [ ],
+  "target_type" : null,
+  "info_messages" : [ ],
+  "prompt_message" : null,
+  "system_version" : "8.0.0 (1007050053)",
+  "steps" : [ {
+    "name" : "Wait For Event",
+    "type" : "WAIT",
+    "condition" : null,
+    "data" : {
+      "failure_action" : "FAIL_STEP",
+      "wait_for_type" : "IP",
+      "timeout" : 300
+    }
+  }, {
+    "name" : "Update Yum",
+    "type" : "SSH",
+    "condition" : null,
+    "data" : {
+      "hostname" : "#{target.ipv4Addresses}",
+      "credentials" : "root-10",
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "sudo yum -y update",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Add Yum Docker Repo",
+    "type" : "SSH",
+    "condition" : null,
+    "data" : {
+      "hostname" : "#{target.ipv4Addresses}",
+      "credentials" : "root-10",
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "sudo tee /etc./yum.repos.d/docker.repo <<-?EOF?\n[dockerrepo]\nname=Docker Repository\nbaseurl=https://yum.dockerproject.org/repo/main/centos/$releasever/\nenabled=1\ngpgcheck=1\ngpgkey=https://yum.dockerproject.org/gpg\nEOF",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Install Docker",
+    "type" : "SSH",
+    "condition" : null,
+    "data" : {
+      "hostname" : "#{target.ipv4Addresses}",
+      "credentials" : "root-10",
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "sudo yum install -y docker-engine",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Start Docker Service",
+    "type" : "SSH",
+    "condition" : null,
+    "data" : {
+      "hostname" : "#{target.ipv4Addresses}",
+      "credentials" : "root-10",
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "sudo service docker start.",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Auto Start Docker on Boot",
+    "type" : "SSH",
+    "condition" : null,
+    "data" : {
+      "hostname" : "#{target.ipv4Addresses}",
+      "credentials" : "root-10",
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "sudo chkconfig docker on.",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Query Installed Containers",
+    "type" : "SSH",
+    "condition" : null,
+    "data" : {
+      "hostname" : "#{target.ipAddress}",
+      "credentials" : "root-10",
+      "failure_action" : "FAIL_STEP",
+      "timeout" : 300,
+      "command_line" : "sudo docker images",
+      "capture_output" : true
+    }
+  }, {
+    "name" : "Send Email",
+    "type" : "EMAIL",
+    "condition" : null,
+    "data" : {
+      "address_list" : "#{request.requester.email}",
+      "email_body" : "#{steps[10].output}",
+      "email_subject" : "Installed Containers on Request #{request.id}",
+      "include_details" : true
+    }
+  } ]
+}
